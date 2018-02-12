@@ -1,0 +1,23 @@
+croquemort-redis:
+    image: redis
+    ports:
+    - "6379:6379"
+
+croquemort-rabbitmq:
+    image: rabbitmq:3.5-management
+    ports:
+    - "5672:5672"
+    - "15672:15672"
+    environment:
+      RABBITMQ_NODENAME: croquemort
+croquemort:
+  build: .
+  links:
+    - croquemort-redis
+    - croquemort-rabbitmq
+  ports:
+    - "8000:8000"
+  environment:
+    - http_proxy
+    - https_proxy
+  entrypoint: ./wait-for-it.sh -t 15 croquemort-rabbitmq:5672 -- honcho start
